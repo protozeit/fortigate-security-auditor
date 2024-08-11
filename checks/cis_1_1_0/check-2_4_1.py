@@ -17,6 +17,7 @@ class Check_CIS_2_4_1(Checker):
 
     def do_check(self):
         config_system_admin = self.get_config("system admin")
+        username_admin_exists = False
 
         if config_system_admin is None:
             self.set_message(f'No \"config system admin\" block defined')
