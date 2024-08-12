@@ -183,26 +183,30 @@ for checker in checkers:
     if args.ids is not None and checker.get_id() not in args.ids:
         continue
 
-    if checker.enabled and checker.is_level_applicable(args.levels):       
-        if checker.auto:
-            checker.run()
-        else:
-            if quiet:
-                checker.skip()
+    try:
+        if checker.enabled and checker.is_level_applicable(args.levels):       
+            if checker.auto:
+                checker.run()
             else:
-                if args.resume:
-                    if checker.get_id() in cached_results.keys():
-                        # There is a cached result for this check
-                        checker.restore_from_cache(cached_results[checker.get_id()])
-                    else:
-                        # There is no cached result, we have to perform the step
-                        checker.run()
+                if quiet:
+                    checker.skip()
                 else:
-                    checker.run()
-        performed_checks.append(checker)
+                    if args.resume:
+                        if checker.get_id() in cached_results.keys():
+                            # There is a cached result for this check
+                            checker.restore_from_cache(cached_results[checker.get_id()])
+                        else:
+                            # There is no cached result, we have to perform the step
+                            checker.run()
+                    else:
+                        checker.run()
+            performed_checks.append(checker)
 
-        # Save to cache
-        cached_results[checker.get_id()] = {"result": checker.result, "message": checker.message, "question": checker.question, "question_context": checker.question_context, "answer": checker.answer}
+            # Save to cache
+            cached_results[checker.get_id()] = {"result": checker.result, "message": checker.message, "question": checker.question, "question_context": checker.question_context, "answer": checker.answer}
+    except Exception as e:
+        print(f'\n[x] Exception occured while running check: {checker.get_id()} - SKIPPING')
+        continue
 
 print('[+] Finished')
 print('------------------------------------------------')
