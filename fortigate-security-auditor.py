@@ -4,11 +4,14 @@ import checks
 import firewall
 import display
 import argparse
-from pathlib import Path
-from json import JSONDecodeError
 import fortios_xutils.parser
 import os
 import shutil
+import logging
+
+from pathlib import Path
+from json import JSONDecodeError
+from termcolor import colored, cprint
 
 parser = argparse.ArgumentParser(description='Apply a benchmark to a Fortigate configuration file. \
         Example: fortigate-security-auditor.py -q -o results.csv -l 1 2 -w WAN1 WAN2 --autofix firewall.conf')
@@ -205,7 +208,9 @@ for checker in checkers:
             # Save to cache
             cached_results[checker.get_id()] = {"result": checker.result, "message": checker.message, "question": checker.question, "question_context": checker.question_context, "answer": checker.answer}
     except Exception as e:
-        print(f'\n[x] Exception occured while running check: {checker.get_id()} - SKIPPING')
+        cprint(f'\n[x] Exception occured while running check: {checker.get_id()} - SKIPPING', 'red')
+        logging.exception(e)
+        print(f'------------------------------------------------')
         continue
 
 print('[+] Finished')
@@ -213,7 +218,10 @@ print('------------------------------------------------')
 print('[+] Here is a summary:')
 
 for performed_check in performed_checks:
-    print(f'[{performed_check.get_id()}]\t[{performed_check.result}]\t{performed_check.title}')
+    if performed_check.result=='FAIL': result_color='red'
+    elif performed_check.result=='PASS': result_color='green'
+    else: result_color='yellow'
+    print(f'[{performed_check.get_id()}]\t[{colored(performed_check.result, result_color)}]\t{performed_check.title}')
 
 # Save cache file
 cache[filepath] = cached_results
