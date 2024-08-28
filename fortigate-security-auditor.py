@@ -208,6 +208,8 @@ for checker in checkers:
             # Save to cache
             cached_results[checker.get_id()] = {"result": checker.result, "message": checker.message, "question": checker.question, "question_context": checker.question_context, "answer": checker.answer}
     except Exception as e:
+        checker.result = 'SKIP'
+        performed_checks.append(checker)
         cprint(f'\n[x] Exception occured while running check: {checker.get_id()} - SKIPPING', 'red')
         logging.exception(e)
         print(f'------------------------------------------------')
